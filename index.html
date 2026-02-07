@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Valentine ❤️</title>
+
+  <style>
+    :root{
+      --bg1:#ffe6f0;
+      --bg2:#fff3f8;
+      --card:#ffffffcc;
+      --text:#1f1f1f;
+    }
+
+    body{
+      margin:0;
+      font-family: Arial, sans-serif;
+      color:var(--text);
+      background: radial-gradient(circle at top, var(--bg2), var(--bg1));
+      overflow-x:hidden;
+      min-height:100vh;
+    }
+
+    /* Hearts canvas */
+    #hearts{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:0;
+    }
+
+    .wrap{
+      position:relative;
+      z-index:1;
+      display:flex;
+      justify-content:center;
+      padding:28px 12px 60px;
+    }
+
+    .card{
+      width:min(820px, 96vw);
+      background:var(--card);
+      backdrop-filter: blur(8px);
+      border-radius:24px;
+      padding:22px;
+      box-shadow: 0 16px 40px rgba(0,0,0,.12);
+      text-align:center;
+    }
+
+    h1{
+      margin:6px 0 12px;
+      font-size: clamp(26px, 4vw, 44px);
+      letter-spacing:.2px;
+    }
+
+    h2{
+      margin:18px 0 10px;
+      font-size: clamp(18px, 3vw, 26px);
+    }
+
+    .hero{
+      margin:12px auto 18px;
+      width:100%;
+      border-radius:20px;
+      overflow:hidden;
+    }
+    .hero img{
+      width:100%;
+      height: clamp(220px, 40vw, 380px);
+      object-fit:cover;
+      display:block;
+    }
+
+    .btnrow{
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top:10px;
+      position:relative;
+      min-height:70px; /* ca sa aiba loc NO-ul care fuge */
+    }
+
+    button{
+      padding:14px 22px;
+      font-size:18px;
+      border-radius:14px;
+      border:none;
+      cursor:pointer;
+      box-shadow: 0 10px 22px rgba(0,0,0,.12);
+      transition: transform .12s ease;
+      user-select:none;
+    }
+    button:active{ transform: scale(.98); }
+
+    .yes{
+      background:#ff3b7a;
+      color:white;
+      font-weight:700;
+    }
+    .soft{
+      background:#ffffff;
+    }
+
+    /* NO that runs */
+    #noBtn{
+      position:absolute;
+      left:50%;
+      transform:translateX(140px);
+      top:0px;
+      background:#ffffff;
+    }
+
+    .hidden{ display:none; }
+
+    .menu{
+      margin-top:18px;
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+
+    .section{
+      margin-top:16px;
+      background:#ffffff;
+      border-radius:18px;
+      padding:16px;
+      box-shadow: 0 10px 22px rgba(0,0,0,.08);
+      text-align:left;
+    }
+
+    .section p{
+      font-size:18px;
+      line-height:1.45;
+      margin:8px 0 0;
+    }
+
+    /* Gallery */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap:12px;
+      margin-top:12px;
+    }
+    .grid img{
+      width:100%;
+      height:200px;
+      object-fit:cover;
+      border-radius:16px;
+      cursor:pointer;
+      transition: transform .12s ease;
+    }
+    .grid img:hover{ transform: scale(1.02); }
+
+    /* Modal */
+    #modal{
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,.65);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:5;
+      padding:16px;
+    }
+    #modal img{
+      max-width:min(980px, 96vw);
+      max-height:90vh;
+      border-radius:18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+
+    /* Final banner */
+    .yay{
+      margin-top:14px;
+      padding:14px 16px;
+      border-radius:16px;
+      background: linear-gradient(90deg, #ff3b7a, #ff7aa6);
+      color:white;
+      font-weight:800;
+      font-size:20px;
+      box-shadow: 0 12px 26px rgba(255,59,122,.35);
+    }
+
+    .tiny{
+      opacity:.75;
+      font-size:14px;
+      margin-top:8px;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="hearts"></canvas>
+
+  <div class="wrap">
+    <div class="card">
+      <h1 id="title">Will you be my Valentine? ❤️</h1>
+
+      <div class="hero">
+        <img src="cover.jpg" alt="Cover photo">
+      </div>
+
+      <!-- Question buttons -->
+      <div class="btnrow" id="qRow">
+        <button class="yes" id="yesBtn">YES</button>
+        <button id="noBtn">NO</button>
+      </div>
+
+      <div id="yay" class="yay hidden">Yay!! I love you so much ❤️✨</div>
+
+      <!-- Menu after YES -->
+      <div id="menu" class="menu hidden">
+        <button class="soft" data-target="msg">💌 Message for you</button>
+        <button class="soft" data-target="mem">📸 Our memories</button>
+        <button class="soft" data-target="gift">🎁 Your gift</button>
+      </div>
+
+      <!-- Sections -->
+      <div id="msg" class="section hidden">
+        <h2>For you 💌</h2>
+        <p>
+          Hey love… You make my days lighter and my heart calmer.  
+          Thank you for every smile, every hug, every “we” moment.  
+          I choose you — today, on Valentine’s, and every day after. ❤️
+        </p>
+        <p class="tiny">*(Poți schimba textul cu mesajul tău real.)*</p>
+      </div>
+
+      <div id="mem" class="section hidden">
+        <h2>Our memories 📸</h2>
+        <p>Tap on a photo to view it bigger ❤️</p>
+        <div class="grid" id="gallery">
+          <img src="mem1.jpg" alt="Memory 1">
+          <img src="mem2.jpg" alt="Memory 2">
+          <img src="mem3.jpg" alt="Memory 3">
+          <!-- Dacă vrei mai multe: adaugă aici mem4.jpg etc. -->
+        </div>
+      </div>
+
+      <div id="gift" class="section hidden">
+        <h2>Your gift 🎁</h2>
+        <img src="gift.jpg" alt="Gift" style="width:100%;border-radius:16px;max-height:360px;object-fit:cover;">
+        <p style="margin-top:10px;">Open it when we meet 😌❤️</p>
+      </div>
+
+      <!-- Music (plays after YES) -->
+      <audio id="music" src="music.mp3" preload="auto" loop></audio>
+      <div class="tiny">Tip: muzica pornește când apasă YES (browser-urile blochează autoplay fără click).</div>
+    </div>
+  </div>
+
+  <!-- Image modal -->
+  <div id="modal">
+    <img id="modalImg" src="" alt="Big memory">
+  </div>
+
+  <script>
+    /* ========= NO button runs away ========= */
+    const noBtn = document.getElementById("noBtn");
+    const qRow  = document.getElementById("qRow");
+
+    function moveNo(){
+      const pad = 10;
+      const rect = qRow.getBoundingClientRect();
+      const btnRect = noBtn.getBoundingClientRect();
+
+      const maxX = rect.width - btnRect.width - pad;
+      const maxY = rect.height - btnRect.height - pad;
+
+      const x = Math.random() * Math.max(maxX, 0);
+      const y = Math.random() * Math.max(maxY, 0);
+
+      noBtn.style.left = x + "px";
+      noBtn.style.top  = y + "px";
+      noBtn.style.transform = "none";
+    }
+
+    noBtn.addEventListener("mouseenter", moveNo);
+    noBtn.addEventListener("touchstart", (e)=>{ e.preventDefault(); moveNo(); }, {passive:false});
+
+    /* ========= YES flow ========= */
+    const yesBtn = document.getElementById("yesBtn");
+    const menu   = document.getElementById("menu");
+    const yay    = document.getElementById("yay");
+    const music  = document.getElementById("music");
+
+    yesBtn.addEventListener("click", async () => {
+      // show menu and yay
+      menu.classList.remove("hidden");
+      yay.classList.remove("hidden");
+
+      // optional: lock NO
+      noBtn.classList.add("hidden");
+      yesBtn.disabled = true;
+      yesBtn.style.opacity = .8;
+
+      // start hearts stronger
+      heartsBoost = 1.8;
+
+      // play music (allowed after click)
+      try { await music.play(); } catch(e) {}
+
+      // auto-open message section
+      showSection("msg");
+    });
+
+    /* ========= Menu navigation ========= */
+    const sections = ["msg","mem","gift"];
+    function showSection(id){
+      sections.forEach(s => document.getElementById(s).classList.add("hidden"));
+      document.getElementById(id).classList.remove("hidden");
+      document.getElementById(id).scrollIntoView({behavior:"smooth", block:"start"});
+    }
+
+    menu.addEventListener("click", (e) => {
+      const btn = e.target.closest("button");
+      if(!btn) return;
+      const target = btn.getAttribute("data-target");
+      if(target) showSection(target);
+    });
+
+    /* ========= Gallery modal ========= */
+    const modal = document.getElementById("modal");
+    const modalImg = document.getElementById("modalImg");
+
+    document.getElementById("gallery").addEventListener("click", (e)=>{
+      const img = e.target.closest("img");
+      if(!img) return;
+      modalImg.src = img.src;
+      modal.style.display = "flex";
+    });
+    modal.addEventListener("click", ()=>{ modal.style.display="none"; });
+
+    /* ========= Animated hearts ========= */
+    const canvas = document.getElementById("hearts");
+    const ctx = canvas.getContext("2d");
+    let W, H;
+
+    function resize(){
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    function rand(min, max){ return Math.random() * (max-min) + min; }
+
+    const hearts = [];
+    let heartsBoost = 1.0;
+
+    function spawnHeart(){
+      hearts.push({
+        x: rand(0, W),
+        y: H + 30,
+        size: rand(10, 22),
+        speed: rand(0.8, 2.2) * heartsBoost,
+        drift: rand(-0.6, 0.6),
+        alpha: rand(0.35, 0.9),
+        rot: rand(0, Math.PI*2),
+        rotSp: rand(-0.03, 0.03)
+      });
+    }
+
+    function drawHeart(x, y, s, rot, a){
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rot);
+      ctx.globalAlpha = a;
+
+      ctx.beginPath();
+      // heart path
+      ctx.moveTo(0, s*0.35);
+      ctx.bezierCurveTo(0, -s*0.15, -s*0.5, -s*0.15, -s*0.5, s*0.2);
+      ctx.bezierCurveTo(-s*0.5, s*0.55, 0, s*0.75, 0, s);
+      ctx.bezierCurveTo(0, s*0.75, s*0.5, s*0.55, s*0.5, s*0.2);
+      ctx.bezierCurveTo(s*0.5, -s*0.15, 0, -s*0.15, 0, s*0.35);
+      ctx.closePath();
+
+      // gradient fill
+      const g = ctx.createLinearGradient(-s, -s, s, s);
+      g.addColorStop(0, "#ff3b7a");
+      g.addColorStop(1, "#ff7aa6");
+      ctx.fillStyle = g;
+      ctx.fill();
+
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
+
+    function tick(){
+      ctx.clearRect(0,0,W,H);
+
+      // spawn rate
+      const spawnCount = Math.floor(3 * heartsBoost);
+      for(let i=0;i<spawnCount;i++) spawnHeart();
+
+      for(let i=hearts.length-1;i>=0;i--){
+        const h = hearts[i];
+        h.y -= h.speed;
+        h.x += h.drift;
+        h.rot += h.rotSp;
+        h.alpha -= 0.0025;
+
+        drawHeart(h.x, h.y, h.size, h.rot, Math.max(h.alpha,0));
+
+        if(h.y < -40 || h.alpha <= 0) hearts.splice(i,1);
+      }
+
+      requestAnimationFrame(tick);
+    }
+    tick();
+  </script>
+</body>
+</html>
